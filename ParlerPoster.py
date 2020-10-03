@@ -25,9 +25,9 @@ SMS_OTP_SUBMIT_URL = "/login/sms/otp/submit"
 PROFILE_URL = "/profile"
 POST_URL = "/post"
 
-proxies = {
-    'https': 'http://127.0.0.1:8080',
-}
+# proxies = {
+#     'https': 'http://127.0.0.1:8080',
+# }
 
 
 class ParlerApi:
@@ -68,9 +68,11 @@ class ParlerApi:
                     "content-length": str(len(str_post_data) - 1),
                     "cookie": "mst=" + self.mst + "; jst=" + self.jst
                 }
-            r = requests.post(request_url, proxies=proxies, verify=False, data=request_body, headers=header_data)
+            # r = requests.post(request_url, proxies=proxies, verify=False, data=request_body, headers=header_data)
+            r = requests.post(request_url, data=request_body, headers=header_data)
         else:
-            r = requests.get(request_url, proxies=proxies, verify=False, headers=header_data)
+            # r = requests.get(request_url, proxies=proxies, verify=False, headers=header_data)
+            r = requests.get(request_url, headers=header_data)
         if r is not None:
             # if there are cookies in the RequestsCookieJar, set them
             # <RequestsCookieJar[<Cookie jst=eyJhbG...BQ for .parler.com/>, <Cookie mst=s%3ALL...0I for .parler.com/>]>
