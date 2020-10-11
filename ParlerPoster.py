@@ -25,9 +25,12 @@ SMS_OTP_SUBMIT_URL = "/login/sms/otp/submit"
 PROFILE_URL = "/profile"
 POST_URL = "/post"
 
-# proxies = {
-#     'https': 'http://127.0.0.1:8080',
-# }
+#v1 fields
+FEED_URL = "/feed?limit=10"
+
+proxies = {
+    'https': 'http://127.0.0.1:8080',
+}
 
 
 class ParlerApi:
@@ -209,10 +212,12 @@ class ParlerApi:
         if self.identifier is not None and self.mst is not None:
             self.api_factory("POST", BASE_V1_URL + POST_URL, params)
 
-    def get_post(self):
+    def get_feed(self):
         params = {}
+        retval = ""
         if self.identifier is not None and self.mst is not None:
-            self.api_factory("POST", BASE_V1_URL + POST_URL, params)
+            retval = self.api_factory("GET", BASE_V1_URL + FEED_URL, params).text
+        return retval
 
     # test the waters to see if we can pull a profile, if not, erase the current cookies,
     #  and replace the file
@@ -220,6 +225,13 @@ class ParlerApi:
         params = {}
         result_code = self.api_factory("GET", BASE_V1_URL + PROFILE_URL)
         if result_code.status_code == 200:
+            return True
+        elif result_code.status_code == 401:
+            os.remove("parler.cookies")
+            self.login()
+            self.captcha()
+            self.submit_captcha()
+            self.submit_otp()
             return True
         else:
             if path.exists("parler.cookies"):
@@ -255,6 +267,11 @@ if __name__ == "__main__":
     parler = ParlerApi(username, password)
     able_to_post = parler.get_profile_load_cookies()
     while able_to_post:
-        print("What would you like to post?: ")
+        print("Enter 1 for POST and 2 for FEED: ")
         post_data = sys.stdin.readline().strip('\n')
-        parler.submit_post(post_data)
+        if int(post_data) == 1:
+            print("What would you like to post?: ")
+            posting_data = sys.stdin.readline().strip('\n')
+            parler.submit_post(posting_data)
+        elif int(post_data) == 2:
+            print(parler.get_feed())
